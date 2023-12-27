@@ -7,6 +7,7 @@ import streamlit as st
 from collections import Counter
 from math import sqrt
 from PIL import Image
+import webbrowser
 
 def read_txt(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
@@ -74,7 +75,7 @@ def preprocess_directory(directory_path, stop_words, dicti):
     return results
 
 def calculate_similarity(query, documents, stop_words, dicti, all_words):
-    query_stemmed_tokens = preprocess_text(query, stop_words, dicti)[1]
+    query_stemmed_tokens = preprocess_text(query, stop_words, dicti)[3]
     query_vector = build_doc_vector(Counter(query_stemmed_tokens), all_words)
     document_vectors = [build_doc_vector(Counter(doc), all_words) for _, _, _, _, _, doc, _ in documents]
     similarity_scores = [cosine_similarity(query_vector, doc_vector) for doc_vector in document_vectors]
@@ -161,11 +162,12 @@ def main():
             similarity_scores = calculate_similarity(user_query, results, stop_words, dicti, all_words)
 
             st.subheader("Search Results:")
-            for (filename, content, _, _, _, _, _), score in sorted(zip(results, similarity_scores), key=lambda x: x[1], reverse=True):
+            for (filename, _, _, _, _, _, _), score in sorted(zip(results, similarity_scores), key=lambda x: x[1], reverse=True):
                 st.write(f"**Similarity Score** :orange[{filename}] : :red[{score:.4f}]")
-                if st.button(f"Open :orange[{filename}]"):
-                    display_image(os.path.join(directory_path, filename))
-            st.markdown("---") 
+                if st.button(f"Open :orange[{filename}]", key=str(filename)):
+                    file_path = os.path.join(os.getcwd(), "file_test_dicky", filename)
+                    print(file_path)
+    st.markdown("---")
 
 if __name__ == "__main__":
     main()
