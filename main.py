@@ -6,8 +6,6 @@ from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 import streamlit as st
 from collections import Counter
 from math import sqrt
-from PIL import Image
-import webbrowser
 
 def read_txt(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
@@ -113,9 +111,18 @@ def word_count_table(stemmed_tokens):
         data['Count'].append(count)
     return data
 
-def display_image(image_path):
-    image = Image.open(image_path)
-    st.image(image, caption="Image", use_column_width=True)
+if "button_clicked" not in st.session_state:
+    st.session_state.button_clicked = False
+
+def callback():
+    st.session_state.button_clicked = True
+
+def open_file(file_path):
+    try:
+        os.startfile(file_path)  # Hanya berfungsi pada Windows
+        st.success('File berhasil dibuka, tunggu beberapa saat', icon="✅")
+    except:
+        st.warning('Terjadi kesalahan saat membuka file', icon="⚠️")
 
 def main():
     st.header('Implementing the :orange[VSM] (Vector Space Model) Algorithm for Information Retrieval', divider='orange')
@@ -153,11 +160,10 @@ def main():
     st.table([all_words])
     st.header('', divider='orange')  
 
-
     st.subheader("Query:")
     user_query = st.text_input("Enter your query:")
 
-    if st.button("Search"):
+    if st.button("Search", on_click=callback) or st.session_state.button_clicked:
         if user_query:
             similarity_scores = calculate_similarity(user_query, results, stop_words, dicti, all_words)
 
@@ -166,7 +172,7 @@ def main():
                 st.write(f"**Similarity Score** :orange[{filename}] : :red[{score:.4f}]")
                 if st.button(f"Open :orange[{filename}]", key=str(filename)):
                     file_path = os.path.join(os.getcwd(), "file_test_dicky", filename)
-                    print(file_path)
+                    open_file(file_path)
     st.markdown("---")
 
 if __name__ == "__main__":
