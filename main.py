@@ -127,52 +127,62 @@ def open_file(file_path):
 def main():
     st.header('Implementing the :orange[VSM] (Vector Space Model) Algorithm for Information Retrieval', divider='orange')
 
-    directory_name = "file_test_dicky"
-    directory_path = os.path.join(os.getcwd(), directory_name)
+    # Menambahkan radio button untuk memilih antara menggunakan path saat ini atau memilih path
+    path_option = st.radio("Select Path Option:", ["Use Current Path", "Enter Path Manually"])
 
-    stop_words = read_stop_words_sastrawi()
-    dicti = read_dicti_sastrawi("kata-dasar.txt")
+    if path_option == "Use Current Path":
+        directory_path = "file_test_dicky"  # Ganti dengan path saat ini atau default
+    else:
+        # Meminta pengguna memasukkan path secara manual
+        directory_path = st.text_input("Enter the directory path:")
 
-    st.subheader("List of Files in the Directory:")
-    file_list = os.listdir(directory_path)
-    st.text("\n".join(file_list))
+    if directory_path and os.path.exists(directory_path):
+        stop_words = read_stop_words_sastrawi()
+        dicti = read_dicti_sastrawi("kata-dasar.txt")
 
-    results = preprocess_directory(directory_path, stop_words, dicti)
+        st.subheader("List of Files in the Directory:")
+        file_list = os.listdir(directory_path)
+        st.text("\n".join(file_list))
 
-    st.subheader("Results:")
-    st.header('', divider='orange')  
-    for filename, content, original_lower, original_cleaned, original_tokens, stemmed_tokens, word_count in results:
-        st.subheader(f"**File:** :orange[{filename}]")
-        st.write("**Original Content:**", content)
-        st.write("**After Case Folding:**", f":orange[{original_lower}]")
-        st.write("**After Cleaned:**", f":orange[{original_cleaned}]")
-        st.write("**After Tokenize:**", original_tokens)
-        st.write("**After Stemmed:**", stemmed_tokens)
-        st.write(f"**Total Words:** {word_count}")
-        st.write("Word Count Table:")
-        word_count_data = word_count_table(stemmed_tokens)
-        st.table(word_count_data)
+        results = preprocess_directory(directory_path, stop_words, dicti)
 
+        st.subheader("Results:")
+        st.header('', divider='orange')  
+        for filename, content, original_lower, original_cleaned, original_tokens, stemmed_tokens, word_count in results:
+            st.subheader(f"**File:** :orange[{filename}]")
+            st.write("**Original Content:**", content)
+            st.write("**After Case Folding:**", f":orange[{original_lower}]")
+            st.write("**After Cleaned:**", f":orange[{original_cleaned}]")
+            st.write("**After Tokenize:**", original_tokens)
+            st.write("**After Stemmed:**", stemmed_tokens)
+            st.write(f"**Total Words:** {word_count}")
+            st.write("Word Count Table:")
+            word_count_data = word_count_table(stemmed_tokens)
+            st.table(word_count_data)
+
+            st.header('', divider='orange')  
+
+        all_words = calculate_unique_vector(results)
+        st.subheader("Vector Unique Word:")
+        st.table([all_words])
         st.header('', divider='orange')  
 
-    all_words = calculate_unique_vector(results)
-    st.subheader("Vector Unique Word:")
-    st.table([all_words])
-    st.header('', divider='orange')  
+        st.subheader("Query:")
+        user_query = st.text_input("Enter your query:")
 
-    st.subheader("Query:")
-    user_query = st.text_input("Enter your query:")
+        if st.button("Search", on_click=callback) or st.session_state.button_clicked:
+            if user_query:
+                similarity_scores = calculate_similarity(user_query, results, stop_words, dicti, all_words)
 
-    if st.button("Search", on_click=callback) or st.session_state.button_clicked:
-        if user_query:
-            similarity_scores = calculate_similarity(user_query, results, stop_words, dicti, all_words)
+                st.subheader("Search Results:")
+                for (filename, _, _, _, _, _, _), score in sorted(zip(results, similarity_scores), key=lambda x: x[1], reverse=True):
+                    st.write(f"**Similarity Score** :orange[{filename}] : :red[{score:.4f}]")
+                    if st.button(f"Open :orange[{filename}]", key=str(filename)):
+                        file_path = os.path.join(directory_path, filename)
+                        open_file(file_path)
+    elif directory_path:
+        st.warning("Directory does not exist.")
 
-            st.subheader("Search Results:")
-            for (filename, _, _, _, _, _, _), score in sorted(zip(results, similarity_scores), key=lambda x: x[1], reverse=True):
-                st.write(f"**Similarity Score** :orange[{filename}] : :red[{score:.4f}]")
-                if st.button(f"Open :orange[{filename}]", key=str(filename)):
-                    file_path = os.path.join(os.getcwd(), "file_test_dicky", filename)
-                    open_file(file_path)
     st.markdown("---")
 
 if __name__ == "__main__":
