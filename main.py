@@ -121,20 +121,18 @@ def callback():
 def open_file(file_path):
     try:
         os.startfile(file_path)  # Only works on Windows
-        st.success('File successfully opened, please wait for a moment')
+        st.success('File successfully opened')
     except:
         st.warning('An error occurred while opening the file')
 
 def main():
     st.header('Implementing the :orange[VSM] (Vector Space Model) Algorithm for Information Retrieval', divider='orange')
 
-    # Menambahkan radio button untuk memilih antara menggunakan path saat ini atau memilih path
     path_option = st.radio("Select Path Option:", ["Use Current Path", "Enter Path Manually"])
 
     if path_option == "Use Current Path":
-        directory_path = "file_test_dicky"  # Ganti dengan path saat ini atau default
+        directory_path = "file_test_dicky"
     else:
-        # Meminta pengguna memasukkan path secara manual
         directory_path = st.text_input("Enter the directory path:")
 
     if directory_path and os.path.exists(directory_path):
