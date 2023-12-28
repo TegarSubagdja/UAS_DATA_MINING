@@ -95,7 +95,8 @@ def cosine_similarity(vec1, vec2):
 
 def calculate_unique_vector(docs):
     all_words = set(word for _, _, _, _, _, doc, _ in docs for word in doc)
-    return list(all_words)
+    sorted_allword = sorted(all_words)
+    return list(sorted_allword)
 
 def print_matrix(matrix, header=None):
     if header:
@@ -119,10 +120,10 @@ def callback():
 
 def open_file(file_path):
     try:
-        os.startfile(file_path)  # Hanya berfungsi pada Windows
-        st.success('File berhasil dibuka, tunggu beberapa saat', icon="✅")
+        os.startfile(file_path)  # Only works on Windows
+        st.success('File successfully opened, please wait a moment')
     except:
-        st.warning('Terjadi kesalahan saat membuka file', icon="⚠️")
+        st.warning('An error occurred while opening the file')
 
 def main():
     st.header('Implementing the :orange[VSM] (Vector Space Model) Algorithm for Information Retrieval', divider='orange')
