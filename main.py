@@ -120,10 +120,19 @@ def callback():
 
 def open_file(file_path):
     try:
-        os.startfile(file_path)  # Only works on Windows
+        os.startfile(file_path)  
         st.success('File successfully opened')
     except:
         st.warning('An error occurred while opening the file')
+
+import tkinter as tk
+from tkinter import filedialog
+
+# Set up tkinter
+root = tk.Tk()
+root.withdraw()
+# Make folder picker dialog appear on top of other windows
+root.wm_attributes('-topmost', 1)
 
 def main():
     st.header('Implementing the :orange[VSM] (Vector Space Model) Algorithm for Information Retrieval', divider='orange')
@@ -133,7 +142,7 @@ def main():
     if path_option == "Use Current Path":
         directory_path = "file_test_dicky"
     else:
-        directory_path = st.text_input("Enter the directory path:")
+        directory_path = st.text_input("Enter the directory path:", filedialog.askdirectory(master=root))
 
     if directory_path and os.path.exists(directory_path):
         stop_words = read_stop_words_sastrawi()
