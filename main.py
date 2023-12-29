@@ -51,7 +51,7 @@ def preprocess_text(text, stop_words, dicti):
     stemmer = factory.create_stemmer()
     stemmed_tokens = [stemmer.stem(token) if token not in dicti else dicti[token] for token in filtered_tokens]
 
-    return text_lower, text_cleaned, tokens, stemmed_tokens
+    return text_lower, text_cleaned, filtered_tokens, tokens, stemmed_tokens
 
 def preprocess_directory(directory_path, stop_words, dicti):
     results = []
@@ -67,15 +67,15 @@ def preprocess_directory(directory_path, stop_words, dicti):
             print(f"Ignoring unsupported file: {file_path}")
             continue
 
-        original_lower, original_cleaned, original_tokens, stemmed_tokens = preprocess_text(content, stop_words, dicti)
+        original_lower, original_cleaned, original_filter, original_tokens, stemmed_tokens = preprocess_text(content, stop_words, dicti)
         word_count = len(stemmed_tokens)
-        results.append((filename, content, original_lower, original_cleaned, original_tokens, stemmed_tokens, word_count))
+        results.append((filename, content, original_lower, original_cleaned, original_filter, original_tokens, stemmed_tokens, word_count))
     return results
 
 def calculate_similarity(query, documents, stop_words, dicti, all_words):
     query_stemmed_tokens = preprocess_text(query, stop_words, dicti)[3]
     query_vector = build_doc_vector(Counter(query_stemmed_tokens), all_words)
-    document_vectors = [build_doc_vector(Counter(doc), all_words) for _, _, _, _, _, doc, _ in documents]
+    document_vectors = [build_doc_vector(Counter(doc), all_words) for _, _, _, _, _, _, doc, _ in documents]
     similarity_scores = [cosine_similarity(query_vector, doc_vector) for doc_vector in document_vectors]
     return similarity_scores
 
@@ -94,7 +94,7 @@ def cosine_similarity(vec1, vec2):
     return dot_product / (magnitude_vec1 * magnitude_vec2)
 
 def calculate_unique_vector(docs):
-    all_words = set(word for _, _, _, _, _, doc, _ in docs for word in doc)
+    all_words = set(word for _, _, _, _, _, _, doc, _ in docs for word in doc)
     sorted_all_words = sorted(all_words)
     return list(sorted_all_words)
 
@@ -147,12 +147,13 @@ def main():
 
         st.subheader("Results:")
         st.header('', divider='orange')  
-        for filename, content, original_lower, original_cleaned, original_tokens, stemmed_tokens, word_count in results:
+        for filename, content, original_lower, original_cleaned, original_filter, original_tokens, stemmed_tokens, word_count in results:
             st.subheader(f"**File:** :orange[{filename}]")
             st.write("**Original Content:**", content)
             st.write("**After Case Folding:**", f":orange[{original_lower}]")
             st.write("**After Cleaned:**", f":orange[{original_cleaned}]")
             st.write("**After Tokenize:**", original_tokens)
+            st.write("**After Filtered:**", original_filter)
             st.write("**After Stemmed:**", stemmed_tokens)
             st.write(f"**Total Words:** {word_count}")
             st.write("Word Count Table:")
@@ -174,7 +175,7 @@ def main():
                 similarity_scores = calculate_similarity(user_query, results, stop_words, dicti, all_words)
 
                 st.subheader("Search Results:")
-                for (filename, _, _, _, _, _, _), score in sorted(zip(results, similarity_scores), key=lambda x: x[1], reverse=True):
+                for (filename, _, _, _, _, _, _, _), score in sorted(zip(results, similarity_scores), key=lambda x: x[1], reverse=True):
                     st.write(f"**Similarity Score** :orange[{filename}] : :red[{score:.4f}]")
                     if st.button(f"Open :orange[{filename}]", key=str(filename)):
                         file_path = os.path.join(directory_path, filename)
