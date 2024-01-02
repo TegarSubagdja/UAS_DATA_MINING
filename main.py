@@ -50,7 +50,6 @@ def preprocess_text(text, stop_words, dicti):
     factory = StemmerFactory()
     stemmer = factory.create_stemmer()
     stemmed_tokens = [stemmer.stem(token) if token not in dicti else dicti[token] for token in filtered_tokens]
-    # stemmed_tokens = stemmer.stem(text_cleaned)
 
     return text_lower, text_cleaned, filtered_tokens, tokens, stemmed_tokens
 
