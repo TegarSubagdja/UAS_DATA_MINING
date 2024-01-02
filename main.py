@@ -68,7 +68,7 @@ def preprocess_directory(directory_path, stop_words, dicti):
             continue
 
         original_lower, original_cleaned, original_filter, original_tokens, stemmed_tokens = preprocess_text(content, stop_words, dicti)
-        word_count = len(stemmed_tokens)
+        word_count = len(set(stemmed_tokens))
         results.append((filename, content, original_lower, original_cleaned, original_filter, original_tokens, stemmed_tokens, word_count))
     return results
 
@@ -174,6 +174,10 @@ def main():
                 st.write("**After Tokenize:**", query_stem[2])
                 st.write("**After Filtered:**", query_stem[3])
                 st.write("**After Stemmed:**", query_stem[4])
+                st.write(f"**Total Words:** {len(set(query_stem[4]))}")
+                st.write("Word Count Table:")
+                query_count_data = word_count_table(query_stem[4])
+                st.table(query_count_data)
 
                 st.subheader("Search Results:")
                 for (filename, _, _, _, _, _, _, _), score in sorted(zip(results, similarity_scores), key=lambda x: x[1], reverse=True):
