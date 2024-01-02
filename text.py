@@ -147,6 +147,7 @@ def main():
 
         st.subheader("Results:")
         st.header('', divider='orange')  
+
         for filename, content, original_lower, original_cleaned, original_filter, original_tokens, stemmed_tokens, word_count in results:
             st.subheader(f"**File:** :orange[{filename}]")
             st.write("**Original Content:**", content)

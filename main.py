@@ -50,6 +50,7 @@ def preprocess_text(text, stop_words, dicti):
     factory = StemmerFactory()
     stemmer = factory.create_stemmer()
     stemmed_tokens = [stemmer.stem(token) if token not in dicti else dicti[token] for token in filtered_tokens]
+    # stemmed_tokens = stemmer.stem(text_cleaned)
 
     return text_lower, text_cleaned, filtered_tokens, tokens, stemmed_tokens
 
@@ -97,12 +98,6 @@ def calculate_unique_vector(docs):
     all_words = set(word for _, _, _, _, _, _, doc, _ in docs for word in doc)
     sorted_all_words = sorted(all_words)
     return list(sorted_all_words)
-
-def print_matrix(matrix, header=None):
-    if header:
-        print("\t".join(header))
-    for row in matrix:
-        print("\t".join(str(value) for value in row))
 
 def word_count_table(stemmed_tokens):
     word_counts = Counter(stemmed_tokens)
@@ -173,6 +168,13 @@ def main():
         if st.button("Search", on_click=callback) or st.session_state.button_clicked:
             if user_query:
                 similarity_scores = calculate_similarity(user_query, results, stop_words, dicti, all_words)
+                query_stem = preprocess_text(user_query, stop_words, dicti)
+                st.write("**Original Content:**", user_query)
+                st.write("**After Case Folding:**", f":orange[{query_stem[0]}]")
+                st.write("**After Cleaned:**", f":orange[{query_stem[1]}]")
+                st.write("**After Tokenize:**", query_stem[2])
+                st.write("**After Filtered:**", query_stem[3])
+                st.write("**After Stemmed:**", query_stem[4])
 
                 st.subheader("Search Results:")
                 for (filename, _, _, _, _, _, _, _), score in sorted(zip(results, similarity_scores), key=lambda x: x[1], reverse=True):
